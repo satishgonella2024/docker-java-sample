@@ -1,25 +1,28 @@
 version: '3.9'
+
 services:
   postgres:
     image: postgres:latest
     container_name: postgres-demo
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: sampledb
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT}:5432"
     volumes:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
 
   java-sample-app:
-    image: java-sample-app:latest
+    build: .
     container_name: java-sample-app
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      POSTGRES_HOST: postgres
+      API_ENDPOINT: ${API_ENDPOINT}
     depends_on:
       - postgres
-    environment:
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_USER: user
-      DB_PASSWORD: password
-      DB_NAME: sampledb
+    entrypoint: ["./wait-for-it.sh", "postgres", "5432", "--", "java", "-jar", "app.jar"]

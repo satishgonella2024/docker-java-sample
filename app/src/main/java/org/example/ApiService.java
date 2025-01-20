@@ -5,20 +5,19 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 public class ApiService {
-    private static final String API_URL = "https://jsonplaceholder.typicode.com/posts/1";
+    private static final String API_ENDPOINT = System.getenv("API_ENDPOINT");
 
-    public String getDataFromApi() throws Exception {
+    public String getDataFromApi() {
         OkHttpClient client = new OkHttpClient();
-
         Request request = new Request.Builder()
-                .url(API_URL)
-                .build();
+            .url(API_ENDPOINT)
+            .build();
 
         try (Response response = client.newCall(request).execute()) {
-            if (!response.isSuccessful()) {
-                throw new RuntimeException("Unexpected response: " + response);
-            }
             return response.body().string();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
         }
     }
 }
